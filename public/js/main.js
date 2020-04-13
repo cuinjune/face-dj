@@ -1,4 +1,4 @@
-const isDebugMode = true;
+const isDebugMode = false;
 const VIDEO_SIZE = 400;
 let model, ctx, videoWidth, videoHeight, video, canvas;
 let volume, panning, cutoff, resonance;
@@ -50,7 +50,7 @@ async function renderPrediction() {
                 const silhouetteRightZ = prediction.annotations.silhouette[28][2];
                 const silhouetteTopZ = prediction.annotations.silhouette[0][2];
                 const silhouetteBottomZ = prediction.annotations.silhouette[18][2];
-                panning = map(silhouetteRightZ - silhouetteLeftZ, -100, 100, 0, 1);
+                panning = map(silhouetteLeftZ - silhouetteRightZ, -200, 200, 0, 1);
                 cutoff = map(silhouetteTopZ - silhouetteBottomZ, -100, 100, 0, 1);
 
                 // lips
@@ -58,9 +58,14 @@ async function renderPrediction() {
                 const lipsLowerInnerCenterY = prediction.annotations.lipsLowerInner[5][1];
                 resonance = map(lipsLowerInnerCenterY - lipsUpperInnerCenterY, 0, VIDEO_SIZE / 4, 0, 1) / volume;
 
+                // send to pd
+                Module.sendFloat("volume", volume);
+                Module.sendFloat("panning", panning);
+                Module.sendFloat("cutoff", cutoff);
+                Module.sendFloat("resonance", resonance);
+
                 // debugging
                 if (isDebugMode) {
-
                     console.log("volume: ", volume);
                     console.log("panning: ", panning);
                     console.log("cutoff: ", cutoff);
@@ -109,6 +114,11 @@ async function main() {
 };
 
 window.addEventListener("DOMContentLoaded", async () => {
-
     main();
+
+    function playMusic() {
+        Module.sendBang("playMusic");
+    }
+
+    document.getElementById("playMusicButton").addEventListener("click", playMusic, false);
 });

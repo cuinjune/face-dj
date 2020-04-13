@@ -92,7 +92,7 @@ int main(int argc, char **argv)
     want.freq = 44100;
     want.format = AUDIO_F32;
     want.channels = 2;
-    want.samples = 512;
+    want.samples = 2048;
     want.callback = audio;
     SDL_AudioDeviceID dev = SDL_OpenAudioDevice(NULL, 0, &want, &have, SDL_AUDIO_ALLOW_ANY_CHANGE);
     printf("want: %d %d %d %d\n", want.freq, want.format, want.channels, want.samples);
@@ -114,6 +114,6 @@ int main(int argc, char **argv)
 
     // start audio processing
     SDL_PauseAudioDevice(dev, 0);
-    emscripten_set_main_loop(main1, 60, 1);
+    emscripten_set_main_loop(main1, 1, 1);
     return 0;
 }

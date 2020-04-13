@@ -7,12 +7,17 @@
   <meta name="description" content="Use your face to control music" />
   <meta name="keywords" content="dj" />
   <meta name="generator" content="emscripten" />
-  <link rel="stylesheet" href="css/main.css"></link>
+  <link rel="stylesheet" href="css/main.css">
+  </link>
+  <script src="js/emscriptenModule.js"></script>
   <script src="emscripten/main.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core"></script>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter"></script>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/facemesh"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/debugDraw.js"></script>
+  <script src="js/main.js"></script>
 </head>
 
 <body>
@@ -31,9 +36,7 @@
       </div>
     </div>
   </div>
+  <button id="playMusicButton">Play Music</button>
 </body>
-<script src="js/utils.js"></script>
-<script src="js/emscriptenModule.js"></script>
-<script src="js/debugDraw.js"></script>
-<script src="js/main.js"></script>
+
 </html>
