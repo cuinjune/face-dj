@@ -1,3 +1,21 @@
+const isDebuggingMode = false;
+const VIDEO_SIZE = 400;
+let model, ctx, videoWidth, videoHeight, video, canvas;
+let volume, panning, cutoff, resonance;
+
+function isMobile() {
+    const isAndroid = /Android/i.test(navigator.userAgent);
+    const isiOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    return isAndroid || isiOS;
+}
+
+const mobile = isMobile();
+const state = {
+    backend: "webgl",
+    maxFaces: 1,
+    triangulateMesh: false
+};
+
 // audio autoplay
 const audioContextList = [];
 (function () {
@@ -35,232 +53,152 @@ var Module = {
     }
 };
 
-async function getSynthData() {
-    const synthUrl = "/api/v1/synth/data";
-    const synthUrlApiOptions = { method: "GET" };
-    const synthUrlResponse = await fetch(synthUrl, synthUrlApiOptions);
-    const synthJson = await synthUrlResponse.json();
-    return synthJson;
+async function setupCamera() {
+    video = document.getElementById("video");
+    const stream = await navigator.mediaDevices.getUserMedia({
+        "audio": false,
+        "video": {
+            facingMode: "user",
+            // Only setting the video to a specified size in order to accommodate a
+            // point cloud, so on mobile devices accept the default size.
+            width: mobile ? undefined : VIDEO_SIZE,
+            height: mobile ? undefined : VIDEO_SIZE
+        },
+    });
+    video.srcObject = stream;
+    return new Promise((resolve) => {
+        video.onloadedmetadata = () => {
+            resolve(video);
+        };
+    });
 }
 
-async function addSynthDataElement(newData) {
-    const synthUrl = "/api/v1/synth/data";
-    const synthUrlApiOptions = { method: "POST", headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' }, body: JSON.stringify(newData) };
-    const synthUrlResponse = await fetch(synthUrl, synthUrlApiOptions);
-    const synthJson = await synthUrlResponse.json();
-    return synthJson;
+function map(value, inputMin, inputMax, outputMin, outputMax) {
+    return (value - inputMin) * (outputMax - outputMin) / (inputMax - inputMin) + outputMin;
 }
 
-async function updateSynthDataElement(id, newData) {
-    const synthUrl = `/api/v1/synth/data/${id}`;
-    const synthUrlApiOptions = { method: "PUT", headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' }, body: JSON.stringify(newData) };
-    const synthUrlResponse = await fetch(synthUrl, synthUrlApiOptions);
-    const synthJson = await synthUrlResponse.json();
-    return synthJson;
-}
+async function renderPrediction() {
+    const predictions = await model.estimateFaces(video);
+    ctx.drawImage(video, 0, 0, videoWidth, videoHeight, 0, 0, canvas.width, canvas.height);
 
-async function deleteSynthDataElement(id) {
-    const synthUrl = `/api/v1/synth/data/${id}`;
-    const synthUrlApiOptions = { method: "DELETE", headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' } };
-    const synthUrlResponse = await fetch(synthUrl, synthUrlApiOptions);
-    const synthJson = await synthUrlResponse.json();
-    return synthJson;
-}
+    if (predictions.length > 0) {
+        predictions.forEach(prediction => {
+
+            // The probability of a face being present
+            if (prediction.faceInViewConfidence > 0.9) { // only process accurate enough data
+
+                // bounding box
+                const boundingBoxLeftX = prediction.boundingBox.topLeft[0][0];
+                const boundingBoxRightX = prediction.boundingBox.bottomRight[0][0];
+                volume = map(boundingBoxRightX - boundingBoxLeftX, 0, VIDEO_SIZE, 0, 1);
+
+                // silhouette
+                const silhouetteLeftZ = prediction.annotations.silhouette[8][2];
+                const silhouetteRightZ = prediction.annotations.silhouette[28][2];
+                const silhouetteTopZ = prediction.annotations.silhouette[0][2];
+                const silhouetteBottomZ = prediction.annotations.silhouette[18][2];
+                panning = map(silhouetteRightZ - silhouetteLeftZ, -100, 100, 0, 1);
+                cutoff = map(silhouetteTopZ - silhouetteBottomZ, -100, 100, 0, 1);
+
+                // lips
+                const lipsUpperInnerCenterY = prediction.annotations.lipsUpperInner[5][1];
+                const lipsLowerInnerCenterY = prediction.annotations.lipsLowerInner[5][1];
+                resonance = map(lipsLowerInnerCenterY - lipsUpperInnerCenterY, 0, VIDEO_SIZE / 4, 0, 1) / volume;
+
+                // debugging
+                if (isDebuggingMode) {
+
+                    console.log("volume: ", volume);
+                    console.log("panning: ", panning);
+                    console.log("cutoff: ", cutoff);
+                    console.log("resonance: ", resonance);
+
+                    // bounding box
+                    const boundingBoxTopLeft = prediction.boundingBox.topLeft[0];
+                    const boundingBoxBottomRight = prediction.boundingBox.bottomRight[0];
+                    const boundingBoxTopRight = [boundingBoxBottomRight[0], boundingBoxTopLeft[1]];
+                    const boundingBoxBottomLeft = [boundingBoxTopLeft[0], boundingBoxBottomRight[1]];
+                    ctx.beginPath();
+                    ctx.moveTo(boundingBoxTopLeft[0], boundingBoxTopLeft[1]);
+                    ctx.lineTo(boundingBoxTopRight[0], boundingBoxTopRight[1]);
+                    ctx.lineTo(boundingBoxBottomRight[0], boundingBoxBottomRight[1]);
+                    ctx.lineTo(boundingBoxBottomLeft[0], boundingBoxBottomLeft[1]);
+                    ctx.closePath();
+                    ctx.stroke();
+
+                    // silhouette
+                    const silhouetteLeftX = prediction.annotations.silhouette[8][0];
+                    const silhouetteLeftY = prediction.annotations.silhouette[8][1];
+                    ctx.beginPath();
+                    ctx.arc(silhouetteLeftX, silhouetteLeftY, 2, 0, 2 * Math.PI);
+                    ctx.fill();
+                    const silhouetteRightX = prediction.annotations.silhouette[28][0];
+                    const silhouetteRightY = prediction.annotations.silhouette[28][1];
+                    ctx.beginPath();
+                    ctx.arc(silhouetteRightX, silhouetteRightY, 2, 0, 2 * Math.PI);
+                    ctx.fill();
+                    const silhouetteTopX = prediction.annotations.silhouette[0][0];
+                    const silhouetteTopY = prediction.annotations.silhouette[0][1];
+                    ctx.beginPath();
+                    ctx.arc(silhouetteTopX, silhouetteTopY, 2, 0, 2 * Math.PI);
+                    ctx.fill();
+                    const silhouetteBottomX = prediction.annotations.silhouette[18][0];
+                    const silhouetteBottomY = prediction.annotations.silhouette[18][1];
+                    ctx.beginPath();
+                    ctx.arc(silhouetteBottomX, silhouetteBottomY, 2, 0, 2 * Math.PI);
+                    ctx.fill();
+
+                    // lips
+                    const lipsUpperInnerCenterX = prediction.annotations.lipsUpperInner[5][0];
+                    const lipsUpperInnerCenterY = prediction.annotations.lipsUpperInner[5][1];
+                    ctx.beginPath();
+                    ctx.arc(lipsUpperInnerCenterX, lipsUpperInnerCenterY, 2, 0, 2 * Math.PI);
+                    ctx.fill();
+                    const lipsLowerInnerCenterX = prediction.annotations.lipsLowerInner[5][0];
+                    const lipsLowerInnerCenterY = prediction.annotations.lipsLowerInner[5][1];
+                    ctx.beginPath();
+                    ctx.arc(lipsLowerInnerCenterX, lipsLowerInnerCenterY, 2, 0, 2 * Math.PI);
+                    ctx.fill();
+                }
+            }
+        });
+    }
+    requestAnimationFrame(renderPrediction);
+};
+
+async function main() {
+    await tf.setBackend(state.backend);
+    if (isDebuggingMode) {
+        const canvasContainer = document.getElementById("container");
+        canvasContainer.style.display = "block";
+    }
+    await setupCamera();
+    video.play();
+    videoWidth = video.videoWidth;
+    videoHeight = video.videoHeight;
+    video.width = videoWidth;
+    video.height = videoHeight;
+
+    canvas = document.getElementById("output");
+    canvas.width = videoWidth;
+    canvas.height = videoHeight;
+
+    if (!isDebuggingMode) {
+        canvas.style.display = "none"; // hide the canvas
+    }
+    const canvasWrapper = document.getElementById("canvas-wrapper");
+    canvasWrapper.style = `width: ${videoWidth}px; height: ${videoHeight}px`;
+    ctx = canvas.getContext("2d");
+    ctx.translate(canvas.width, 0);
+    ctx.scale(-1, 1);
+    ctx.fillStyle = "red";
+    ctx.strokeStyle = "red";
+    ctx.lineWidth = 1;
+    model = await facemesh.load({ maxFaces: state.maxFaces });
+    renderPrediction();
+};
 
 window.addEventListener("DOMContentLoaded", async () => {
 
-    //synth data
-    var synthData = await getSynthData();
-
-    //get preset index
-    async function getPresetIndex(preset) {
-        synthData = await getSynthData();
-        var presetIndex = -1;
-        for (let i = 0; i < synthData.length; ++i) {
-            if (synthData[i].preset == preset) {
-                presetIndex = i;
-                break;
-            }
-        }
-        return presetIndex;
-    }
-    
-    //knobs
-    var knobs = [];
-    for (let i = 0; i < 16; ++i) {
-        knobs[i] = new Nexus.Dial(`knob${i}`, {
-            'size': [75, 75],
-            'interaction': 'radial', // "radial", "vertical", or "horizontal"
-            'mode': 'relative', // "absolute" or "relative"
-            'min': 0,
-            'max': 1,
-            'step': 0,
-            'value': synthData[0][`knob${i}`]
-        });
-        knobs[i].colorize("accent", "#4DB33D");
-        knobs[i].colorize("fill", "#E8E7D5");
-        knobs[i].on("change", function (v) {
-            Module.sendFloat(`knob${i}`, v);
-        });
-    }
-
-    //presets
-    var options = [];
-    for (let i = 0; i < synthData.length; ++i) {
-        options.push(synthData[i].preset);
-    }
-    var presets = new Nexus.Select('#presets', {
-        'size': [100, 30],
-        'options': options,
-        'selectedIndex': 0
-    });
-    presets.on("change", async function (v) {
-        const preset = v.value;
-        const presetIndex = await getPresetIndex(preset);
-        for (let i = 0; i < 16; ++i) {
-            knobs[i].value = synthData[presetIndex][`knob${i}`];
-        }
-        document.getElementById("preset").value = preset;
-    });
-    async function updateOptions(selectedIndex) {
-        synthData = await getSynthData();
-        options = [];
-        for (let i = 0; i < synthData.length; ++i) {
-            options.push(synthData[i].preset);
-        }
-        presets.defineOptions(options)
-        if (selectedIndex == -1) {
-            presets.selectedIndex = options.length - 1;
-        }
-        else {
-            presets.selectedIndex = selectedIndex;
-        }
-    }
-
-    //save button listener
-    const $saveButton = document.getElementById("saveButton");
-    $saveButton.addEventListener('click', async () => {
-        const preset = document.getElementById("preset").value;
-        var presetIndex = await getPresetIndex(preset);
-        const newData = {
-            preset: preset,
-            knob0: knobs[0].value,
-            knob1: knobs[1].value,
-            knob2: knobs[2].value,
-            knob3: knobs[3].value,
-            knob4: knobs[4].value,
-            knob5: knobs[5].value,
-            knob6: knobs[6].value,
-            knob7: knobs[7].value,
-            knob8: knobs[8].value,
-            knob9: knobs[9].value,
-            knob10: knobs[10].value,
-            knob11: knobs[11].value,
-            knob12: knobs[12].value,
-            knob13: knobs[13].value,
-            knob14: knobs[14].value,
-            knob15: knobs[15].value
-        };
-        if (presetIndex == -1) {
-            if (confirm(`Do you want to save the current settings as a new preset "${preset}?"`)) {
-                await addSynthDataElement(newData);
-                await updateOptions(-1);
-            }
-        }
-        else if (presetIndex == 0) {
-            alert("Cannot overwrite the default preset.\nChange the name to save it as a new preset.");
-        }
-        else {
-            if (confirm(`Do you want to overwrite the existing preset "${preset}?"`)) {
-                await updateSynthDataElement(synthData[presetIndex]._id, newData);
-                await updateOptions(presetIndex);
-            }
-        }
-    });
-
-    //delete button listener
-    const $deleteButton = document.getElementById("deleteButton");
-    $deleteButton.addEventListener('click', async () => {
-        const preset = document.getElementById("preset").value;
-        var presetIndex = await getPresetIndex(preset);
-        if (presetIndex == -1) {
-            alert(`Cannot delete the unsaved preset "${preset}".`);
-        }
-        else if (presetIndex == 0) {
-            alert("Cannot delete the default preset.");
-        }
-        else {
-            if (confirm(`Do you want to delete the preset "${preset}?"`)) {
-                await deleteSynthDataElement(synthData[presetIndex]._id);
-                await updateOptions(presetIndex - 1);
-            }
-        }
-    });
-
-    //keyboard
-    var keyboard = new Nexus.Piano('#keyboard', {
-        'size': [700, 175],
-        'mode': 'button',  // 'button', 'toggle', or 'impulse'
-        'lowNote': 48,
-        'highNote': 84
-    });
-    keyboard.colorize("accent", "#E8E7D5");
-    keyboard.on("change", function (v) {
-        if (v.state == true)
-            Module.sendFloat("note", v.note);
-    });
-    const keyboardMap = {
-        'z': 48,
-        's': 49,
-        'x': 50,
-        'd': 51,
-        'c': 52,
-        'v': 53,
-        'g': 54,
-        'b': 55,
-        'h': 56,
-        'n': 57,
-        'j': 58,
-        'm': 59,
-        ',': 60,
-        'l': 61,
-        '.': 62,
-        ';': 63,
-        '/': 64,
-        'q': 60,
-        '2': 61,
-        'w': 62,
-        '3': 63,
-        'e': 64,
-        'r': 65,
-        '5': 66,
-        't': 67,
-        '6': 68,
-        'y': 69,
-        '7': 70,
-        'u': 71,
-        'i': 72,
-        '9': 73,
-        'o': 74,
-        '0': 75,
-        'p': 76,
-        '[': 77,
-        '=': 78,
-        ']': 79
-    };
-    document.addEventListener("keydown", function (e) {
-        e = e || window.event;
-        if (e.repeat) return;
-        const note = keyboardMap[e.key];
-        if (typeof note == "undefined") return;
-        keyboard.toggleKey(note, true);
-        Module.sendFloat("note", note);
-    });
-    document.addEventListener("keyup", function (e) {
-        e = e || window.event;
-        if (e.repeat) return;
-        const note = keyboardMap[e.key];
-        if (typeof note == "undefined") return;
-        keyboard.toggleKey(note, false);
-    });
+    main();
 });

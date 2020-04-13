@@ -1,0 +1,27 @@
+{
+  "name": "face-dj",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cuinjune/face-dj.git"
+  },
+  "author": "Zack Lee",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cuinjune/face-dj/issues"
+  },
+  "homepage": "https://github.com/cuinjune/face-dj#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.3"
+  }
+}
