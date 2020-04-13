@@ -1,56 +1,13 @@
-const isDebuggingMode = false;
+const isDebugMode = true;
 const VIDEO_SIZE = 400;
 let model, ctx, videoWidth, videoHeight, video, canvas;
 let volume, panning, cutoff, resonance;
-
-function isMobile() {
-    const isAndroid = /Android/i.test(navigator.userAgent);
-    const isiOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-    return isAndroid || isiOS;
-}
 
 const mobile = isMobile();
 const state = {
     backend: "webgl",
     maxFaces: 1,
     triangulateMesh: false
-};
-
-// audio autoplay
-const audioContextList = [];
-(function () {
-    self.AudioContext = new Proxy(self.AudioContext, {
-        construct(target, args) {
-            const result = new target(...args);
-            audioContextList.push(result);
-            return result;
-        }
-    });
-})();
-
-function resumeAudio() {
-    audioContextList.forEach(ctx => {
-        if (ctx.state !== "running") { ctx.resume(); }
-    });
-}
-
-["click", "contextmenu", "auxclick", "dblclick"
-    , "mousedown", "mouseup", "pointerup", "touchend"
-    , "keydown", "keyup"
-].forEach(name => document.addEventListener(name, resumeAudio));
-
-// emscripten module
-var Module = {
-    preRun: []
-    , postRun: []
-    , print: function (e) {
-        1 < arguments.length && (e = Array.prototype.slice.call(arguments).join(" "));
-        console.log(e);
-    }
-    , printErr: function (e) {
-        1 < arguments.length && (e = Array.prototype.slice.call(arguments).join(" "));
-        console.error(e)
-    }
 };
 
 async function setupCamera() {
@@ -71,10 +28,6 @@ async function setupCamera() {
             resolve(video);
         };
     });
-}
-
-function map(value, inputMin, inputMax, outputMin, outputMax) {
-    return (value - inputMin) * (outputMax - outputMin) / (inputMax - inputMin) + outputMin;
 }
 
 async function renderPrediction() {
@@ -106,59 +59,16 @@ async function renderPrediction() {
                 resonance = map(lipsLowerInnerCenterY - lipsUpperInnerCenterY, 0, VIDEO_SIZE / 4, 0, 1) / volume;
 
                 // debugging
-                if (isDebuggingMode) {
+                if (isDebugMode) {
 
                     console.log("volume: ", volume);
                     console.log("panning: ", panning);
                     console.log("cutoff: ", cutoff);
                     console.log("resonance: ", resonance);
-
-                    // bounding box
-                    const boundingBoxTopLeft = prediction.boundingBox.topLeft[0];
-                    const boundingBoxBottomRight = prediction.boundingBox.bottomRight[0];
-                    const boundingBoxTopRight = [boundingBoxBottomRight[0], boundingBoxTopLeft[1]];
-                    const boundingBoxBottomLeft = [boundingBoxTopLeft[0], boundingBoxBottomRight[1]];
-                    ctx.beginPath();
-                    ctx.moveTo(boundingBoxTopLeft[0], boundingBoxTopLeft[1]);
-                    ctx.lineTo(boundingBoxTopRight[0], boundingBoxTopRight[1]);
-                    ctx.lineTo(boundingBoxBottomRight[0], boundingBoxBottomRight[1]);
-                    ctx.lineTo(boundingBoxBottomLeft[0], boundingBoxBottomLeft[1]);
-                    ctx.closePath();
-                    ctx.stroke();
-
-                    // silhouette
-                    const silhouetteLeftX = prediction.annotations.silhouette[8][0];
-                    const silhouetteLeftY = prediction.annotations.silhouette[8][1];
-                    ctx.beginPath();
-                    ctx.arc(silhouetteLeftX, silhouetteLeftY, 2, 0, 2 * Math.PI);
-                    ctx.fill();
-                    const silhouetteRightX = prediction.annotations.silhouette[28][0];
-                    const silhouetteRightY = prediction.annotations.silhouette[28][1];
-                    ctx.beginPath();
-                    ctx.arc(silhouetteRightX, silhouetteRightY, 2, 0, 2 * Math.PI);
-                    ctx.fill();
-                    const silhouetteTopX = prediction.annotations.silhouette[0][0];
-                    const silhouetteTopY = prediction.annotations.silhouette[0][1];
-                    ctx.beginPath();
-                    ctx.arc(silhouetteTopX, silhouetteTopY, 2, 0, 2 * Math.PI);
-                    ctx.fill();
-                    const silhouetteBottomX = prediction.annotations.silhouette[18][0];
-                    const silhouetteBottomY = prediction.annotations.silhouette[18][1];
-                    ctx.beginPath();
-                    ctx.arc(silhouetteBottomX, silhouetteBottomY, 2, 0, 2 * Math.PI);
-                    ctx.fill();
-
-                    // lips
-                    const lipsUpperInnerCenterX = prediction.annotations.lipsUpperInner[5][0];
-                    const lipsUpperInnerCenterY = prediction.annotations.lipsUpperInner[5][1];
-                    ctx.beginPath();
-                    ctx.arc(lipsUpperInnerCenterX, lipsUpperInnerCenterY, 2, 0, 2 * Math.PI);
-                    ctx.fill();
-                    const lipsLowerInnerCenterX = prediction.annotations.lipsLowerInner[5][0];
-                    const lipsLowerInnerCenterY = prediction.annotations.lipsLowerInner[5][1];
-                    ctx.beginPath();
-                    ctx.arc(lipsLowerInnerCenterX, lipsLowerInnerCenterY, 2, 0, 2 * Math.PI);
-                    ctx.fill();
+                    const debugDraw = new DebugDraw(prediction, ctx);
+                    debugDraw.boundingBoxLine();
+                    debugDraw.silhouette4Points();
+                    debugDraw.lipsCenterInnerPoints();
                 }
             }
         });
@@ -168,7 +78,7 @@ async function renderPrediction() {
 
 async function main() {
     await tf.setBackend(state.backend);
-    if (isDebuggingMode) {
+    if (isDebugMode) {
         const canvasContainer = document.getElementById("container");
         canvasContainer.style.display = "block";
     }
@@ -183,7 +93,7 @@ async function main() {
     canvas.width = videoWidth;
     canvas.height = videoHeight;
 
-    if (!isDebuggingMode) {
+    if (!isDebugMode) {
         canvas.style.display = "none"; // hide the canvas
     }
     const canvasWrapper = document.getElementById("canvas-wrapper");
