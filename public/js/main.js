@@ -1,7 +1,8 @@
 const isDebugMode = false;
 const VIDEO_SIZE = 400;
+const lerpAmount = 0.5;
 let model, ctx, videoWidth, videoHeight, video, canvas;
-let volume, panning, cutoff, resonance;
+let volume = 0, panning = 0.5, cutoff = 0, resonance = 0;
 
 const mobile = isMobile();
 const state = {
@@ -43,20 +44,20 @@ async function renderPrediction() {
                 // bounding box
                 const boundingBoxLeftX = prediction.boundingBox.topLeft[0][0];
                 const boundingBoxRightX = prediction.boundingBox.bottomRight[0][0];
-                volume = map(boundingBoxRightX - boundingBoxLeftX, 0, VIDEO_SIZE, 0, 1);
+                volume = lerp(volume, map(boundingBoxRightX - boundingBoxLeftX, 0, VIDEO_SIZE, 0, 1), lerpAmount);
 
                 // silhouette
                 const silhouetteLeftZ = prediction.annotations.silhouette[8][2];
                 const silhouetteRightZ = prediction.annotations.silhouette[28][2];
                 const silhouetteTopZ = prediction.annotations.silhouette[0][2];
                 const silhouetteBottomZ = prediction.annotations.silhouette[18][2];
-                panning = map(silhouetteLeftZ - silhouetteRightZ, -200, 200, 0, 1);
-                cutoff = map(silhouetteTopZ - silhouetteBottomZ, -100, 100, 0, 1);
+                panning = lerp(panning, map(silhouetteLeftZ - silhouetteRightZ, -200, 200, 0, 1), lerpAmount);
+                cutoff = lerp(cutoff, map(silhouetteTopZ - silhouetteBottomZ, -100, 100, 0, 1), lerpAmount);
 
                 // lips
                 const lipsUpperInnerCenterY = prediction.annotations.lipsUpperInner[5][1];
                 const lipsLowerInnerCenterY = prediction.annotations.lipsLowerInner[5][1];
-                resonance = map(lipsLowerInnerCenterY - lipsUpperInnerCenterY, 0, VIDEO_SIZE / 4, 0, 1) / volume;
+                resonance = lerp(resonance, map(lipsLowerInnerCenterY - lipsUpperInnerCenterY, 0, VIDEO_SIZE / 4, 0, 1) / volume, lerpAmount);
 
                 // send to pd
                 Module.sendFloat("volume", volume);
