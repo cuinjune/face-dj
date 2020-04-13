@@ -1,13 +1,21 @@
-// audio autoplay
+const shouldSupportSafari = false;
+
+// create an AudioContext
 const audioContextList = [];
 (function () {
-    self.AudioContext = new Proxy(self.AudioContext, {
-        construct(target, args) {
-            const result = new target(...args);
-            audioContextList.push(result);
-            return result;
-        }
-    });
+    let AudioContext = self.AudioContext || (shouldSupportSafari && self.webkitAudioContext) || false;
+    if (AudioContext) {
+        self.AudioContext = new Proxy(AudioContext, {
+            construct(target, args) {
+                const result = new target(...args);
+                audioContextList.push(result);
+                return result;
+            }
+        });
+    }
+    else {
+        alert("The Web Audio API is not supported in this browser.\nPlease try it in the latest version of Chrome or Firefox.");
+    }
 })();
 
 function resumeAudio() {
