@@ -40,7 +40,7 @@ async function renderPrediction() {
 
             // The probability of a face being present
             if (prediction.faceInViewConfidence > 0.9) { // only process accurate enough data
-
+                
                 // bounding box
                 const boundingBoxLeftX = prediction.boundingBox.topLeft[0][0];
                 const boundingBoxRightX = prediction.boundingBox.bottomRight[0][0];
@@ -60,6 +60,7 @@ async function renderPrediction() {
                 resonance = lerp(resonance, map(lipsLowerInnerCenterY - lipsUpperInnerCenterY, 0, VIDEO_SIZE / 4, 0, 1) / volume, lerpAmount);
 
                 // send to pd
+                Module.sendFloat("setLoop", 0);
                 Module.sendFloat("volume", volume);
                 Module.sendFloat("panning", panning);
                 Module.sendFloat("cutoff", cutoff);
@@ -76,6 +77,9 @@ async function renderPrediction() {
                     debugDraw.silhouette4Points();
                     debugDraw.lipsCenterInnerPoints();
                 }
+            }
+            else { // if face is not being present
+                Module.sendFloat("setLoop", 1);
             }
         });
     }
