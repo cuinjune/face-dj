@@ -1,6 +1,6 @@
 LIBPD_DIR = ../../libpd
 PATCH_DIR = pd
-SRC_FILES = main.cpp
+SRC_FILES = main.cpp hello.cpp
 TARGET = main.html
 PD_DIR = pd
 OUTPUT_FILES = $(TARGET) main.js main.data main.wasm

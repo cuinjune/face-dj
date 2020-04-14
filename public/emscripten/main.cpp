@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <string>
 #include "PdBase.hpp"
+#include "hello.h"
 
 using namespace emscripten;
 
@@ -102,6 +103,9 @@ int main(int argc, char **argv)
     libpd_set_printhook(pdprint);
     libpd_init();
     libpd_init_audio(0, 2, have.freq);
+    
+    // load externals
+    Hello::setup();
 
     // compute audio    [; pd dsp 1(
     libpd_start_message(1); // one entry in list
