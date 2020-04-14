@@ -1,7 +1,7 @@
 const isDebugMode = false;
 const VIDEO_SIZE = 400;
 const lerpAmount = 0.5;
-let model, ctx, videoWidth, videoHeight, video, canvas;
+let model, ctx, videoWidth, videoHeight, video, canvas, threejsDraw;
 let volume = 0, panning = 0.5, cutoff = 0, resonance = 0;
 
 const mobile = isMobile();
@@ -31,10 +31,10 @@ async function setupCamera() {
     });
 }
 
-async function renderPrediction() {
+async function renderPrediction(time) {
     const predictions = await model.estimateFaces(video);
     ctx.drawImage(video, 0, 0, videoWidth, videoHeight, 0, 0, canvas.width, canvas.height);
-
+    
     if (predictions.length > 0) {
         predictions.forEach(prediction => {
 
@@ -83,6 +83,7 @@ async function renderPrediction() {
             }
         });
     }
+    threejsDraw.animate(time);
     requestAnimationFrame(renderPrediction);
 };
 
@@ -115,15 +116,15 @@ async function main() {
     ctx.strokeStyle = "red";
     ctx.lineWidth = 1;
     model = await facemesh.load({ maxFaces: state.maxFaces });
+    threejsDraw = new ThreejsDraw(window.innerWidth, window.innerHeight, "#000000");
+    threejsDraw.init();
     renderPrediction();
 };
 
 window.addEventListener("DOMContentLoaded", async () => {
     main();
-
     function playMusic() {
         Module.sendBang("playMusic");
     }
-
     document.getElementById("playMusicButton").addEventListener("click", playMusic, false);
 });

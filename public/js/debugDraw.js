@@ -54,10 +54,3 @@ class DebugDraw {
         this.ctx.fill();
     }
 }
-
-
-
-
-
-
-
