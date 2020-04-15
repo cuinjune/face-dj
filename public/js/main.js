@@ -1,4 +1,4 @@
-const isDebugMode = false;
+const isDebugMode = true;
 const VIDEO_SIZE = 400;
 const lerpAmount = 0.5;
 let model, ctx, videoWidth, videoHeight, video, canvas, threejsDraw;
@@ -44,7 +44,19 @@ async function renderPrediction(time) {
                 // bounding box
                 const boundingBoxLeftX = prediction.boundingBox.topLeft[0][0];
                 const boundingBoxRightX = prediction.boundingBox.bottomRight[0][0];
+                const boundingBoxTopY = prediction.boundingBox.topLeft[0][1];
+                const boundingBoxBottomY = prediction.boundingBox.bottomRight[0][1];
                 volume = lerp(volume, map(boundingBoxRightX - boundingBoxLeftX, 0, VIDEO_SIZE, 0, 1), lerpAmount);
+
+                // center point
+                const boundingBoxCenterX = boundingBoxLeftX + (boundingBoxRightX - boundingBoxLeftX) / 2;
+                const boundingBoxCenterY = boundingBoxTopY + (boundingBoxBottomY - boundingBoxTopY) / 2;
+                const nomalizedCenterX = 1 - (boundingBoxCenterX / VIDEO_SIZE);
+                const nomalizedCenterY = boundingBoxCenterY / VIDEO_SIZE;
+                const numScale = 3;
+                const scaledCenterX = Math.min(~~(nomalizedCenterX * numScale), numScale - 1);
+                const scaledCenterY = Math.min(~~(nomalizedCenterY * numScale), numScale - 1);
+                const pattern = scaledCenterY * numScale + scaledCenterX;
 
                 // silhouette
                 const silhouetteLeftZ = prediction.annotations.silhouette[8][2];
@@ -60,7 +72,7 @@ async function renderPrediction(time) {
                 resonance = lerp(resonance, map(lipsLowerInnerCenterY - lipsUpperInnerCenterY, 0, VIDEO_SIZE / 4, 0, 1) / volume, lerpAmount);
 
                 // send to pd
-                Module.sendFloat("setLoop", 0);
+                Module.sendFloat("pattern", pattern);
                 Module.sendFloat("volume", volume);
                 Module.sendFloat("panning", panning);
                 Module.sendFloat("cutoff", cutoff);
@@ -74,12 +86,13 @@ async function renderPrediction(time) {
                     console.log("resonance: ", resonance);
                     const debugDraw = new DebugDraw(prediction, ctx);
                     debugDraw.boundingBoxLine();
+                    debugDraw.boundingBoxCenterPoint();
                     debugDraw.silhouette4Points();
                     debugDraw.lipsCenterInnerPoints();
                 }
             }
             else { // if face is not being present
-                Module.sendFloat("setLoop", 1);
+
             }
         });
     }

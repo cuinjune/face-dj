@@ -18,6 +18,16 @@ class DebugDraw {
         this.ctx.stroke();
     }
 
+    boundingBoxCenterPoint() {
+        const boundingBoxTopLeft = this.prediction.boundingBox.topLeft[0];
+        const boundingBoxBottomRight = this.prediction.boundingBox.bottomRight[0];
+        const boundingBoxCenterX = boundingBoxTopLeft[0] + (boundingBoxBottomRight[0] - boundingBoxTopLeft[0]) / 2;
+        const boundingBoxCenterY = boundingBoxTopLeft[1] + (boundingBoxBottomRight[1] - boundingBoxTopLeft[1]) / 2;
+        this.ctx.beginPath();
+        this.ctx.arc(boundingBoxCenterX, boundingBoxCenterY, 2, 0, 2 * Math.PI);
+        this.ctx.fill();
+    }
+
     silhouette4Points() {
         const silhouetteLeftX = this.prediction.annotations.silhouette[8][0];
         const silhouetteLeftY = this.prediction.annotations.silhouette[8][1];
