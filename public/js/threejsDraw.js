@@ -14,17 +14,37 @@ class ThreejsDraw {
         this.camera.position.set(0, 0, 5);
 
         // lighting
-        this.light = new THREE.DirectionalLight(0xFFFFFF, 1);
-        this.light.position.set(0, 0, 5);
+        this.light = new THREE.PointLight(0xFFFFFF, 1);
+        this.light.position.set(0, 10, 10);
         this.scene.add(this.light);
 
-        // cube
-        const texture = new THREE.TextureLoader().load("assets/images/texture.jpg");
-        const geometry = new THREE.BoxGeometry(8, 8, 8);
-        const material = new THREE.MeshStandardMaterial({ map: texture, side: THREE.BackSide });
-        this.cube = new THREE.Mesh(geometry, material);
-        this.cube.position.set(0, 0, 5);
-        this.scene.add(this.cube);
+        // desk plane
+        const geometry = new THREE.PlaneGeometry(200, 80);
+        const material = new THREE.MeshPhongMaterial({ color: 0xb88f6c});
+        this.plane = new THREE.Mesh(geometry, material);
+        this.plane.position.set(0, -15, -50);
+        this.plane.rotation.set(THREE.Math.degToRad(-90), 0, 0);
+        this.scene.add(this.plane);
+
+        // stereo model
+        const scene = this.scene;
+        const modelPath = 'assets/models/stereo/';
+        const mtlLoader = new THREE.MTLLoader();
+        mtlLoader.setCrossOrigin(true);
+        mtlLoader.setPath(modelPath);
+        mtlLoader.load("1281_HIFI_Stereo.mtl", function (materials) {
+            materials.preload();
+            const objLoader = new THREE.OBJLoader();
+            objLoader.setCrossOrigin(true);
+            objLoader.setMaterials(materials);
+            objLoader.setPath(modelPath);
+            objLoader.load("1281_HIFI_Stereo.obj", function (object) {
+                object.name = "stereo";
+                object.position.set(0, -15, -60);
+                object.rotation.set(0, THREE.Math.degToRad(-90), 0);
+                scene.add(object);
+            });
+        });
 
         // events
         window.addEventListener("resize", () => {
@@ -36,7 +56,12 @@ class ThreejsDraw {
 
     animate(time) {
         time *= 0.001; //convert to seconds
-        this.cube.rotation.y = time;
+
+        const object = this.scene.getObjectByName("stereo");
+        if (object) {
+
+        }
+
         this.renderer.render(this.scene, this.camera);
     }
 }

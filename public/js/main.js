@@ -1,4 +1,4 @@
-const isDebugMode = true;
+const isDebugMode = false;
 const VIDEO_SIZE = 400;
 const lerpAmount = 0.5;
 let model, ctx, videoWidth, videoHeight, video, canvas, threejsDraw;
@@ -129,7 +129,7 @@ async function main() {
     ctx.strokeStyle = "red";
     ctx.lineWidth = 1;
     model = await facemesh.load({ maxFaces: state.maxFaces });
-    threejsDraw = new ThreejsDraw(window.innerWidth, window.innerHeight, "#000000");
+    threejsDraw = new ThreejsDraw(window.innerWidth, window.innerHeight, "#535353");
     threejsDraw.init();
     renderPrediction();
 };
