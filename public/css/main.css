@@ -12,6 +12,32 @@ body {
     font-family: Helvetica, sans-serif;
 }
 
+/* title */
+#titleArea {
+    display: flex;
+    flex-direction: column;
+    /* width: 300px; */
+}
+
+#titleArea_row0 {
+    margin-left: 0px;
+}
+
+#titleArea_row1 {
+    margin-left: 2px;
+}
+
+#playMusicButtonArea {
+    margin-left: 5px;
+}
+
+#playMusicButton {
+    font-size: 8pt;
+    text-indent: 6%;
+    width: 60px;
+    height: 30px;
+}
+
 #container {
     display: none;
 }
