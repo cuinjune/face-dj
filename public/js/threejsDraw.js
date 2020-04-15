@@ -10,36 +10,33 @@ class ThreejsDraw {
     }
 
     init() {
-        const scene = this.scene;
-        const camera = this.camera;
-        const renderer = this.renderer;
-
         // camera
-        camera.position.set(0, 0, 5);
+        this.camera.position.set(0, 0, 5);
 
         // lighting
-        const light = new THREE.DirectionalLight(0xFFFFFF, 1);
-        light.position.set(0, 0, 5);
-        scene.add(light);
+        this.light = new THREE.DirectionalLight(0xFFFFFF, 1);
+        this.light.position.set(0, 0, 5);
+        this.scene.add(this.light);
 
         // cube
         const texture = new THREE.TextureLoader().load("assets/images/texture.jpg");
         const geometry = new THREE.BoxGeometry(8, 8, 8);
         const material = new THREE.MeshStandardMaterial({ map: texture, side: THREE.BackSide });
-        const cube = new THREE.Mesh(geometry, material);
-        cube.position.set(0, 0, 5);
-        scene.add(cube);
+        this.cube = new THREE.Mesh(geometry, material);
+        this.cube.position.set(0, 0, 5);
+        this.scene.add(this.cube);
 
         // events
         window.addEventListener("resize", () => {
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
+            this.renderer.setSize(window.innerWidth, window.innerHeight);
+            this.camera.aspect = window.innerWidth / window.innerHeight;
+            this.camera.updateProjectionMatrix();
         });
     }
 
     animate(time) {
         time *= 0.001; //convert to seconds
+        this.cube.rotation.y = time;
         this.renderer.render(this.scene, this.camera);
     }
 }
