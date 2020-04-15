@@ -11,7 +11,8 @@ class ThreejsDraw {
 
     init() {
         // camera
-        this.camera.position.set(0, 0, 5);
+        this.initCameraPosition = [0, 0, 5];
+        this.camera.position.set(this.initCameraPosition);
 
         // lighting
         this.light = new THREE.PointLight(0xFFFFFF, 1);
@@ -54,14 +55,30 @@ class ThreejsDraw {
         });
     }
 
-    animate(time) {
-        time *= 0.001; //convert to seconds
+    animate(time, data) {
+        // change camera position
+        const cameraPostionXRange = 16;
+        const cameraPostionYRange = 16;
+        const cameraPostionZRange = 32;
+        const cameraPostionX = this.initCameraPosition[0] + data.nomalizedCenterPoint[0] * cameraPostionXRange - (cameraPostionXRange / 2);
+        const cameraPostionY = this.initCameraPosition[1] + (1 - data.nomalizedCenterPoint[1]) * cameraPostionYRange - (cameraPostionYRange / 2);
+        const cameraPostionZ = this.initCameraPosition[2] + (1 - data.volume) * cameraPostionZRange - (cameraPostionZRange / 2);
+        this.camera.position.set(cameraPostionX, cameraPostionY, cameraPostionZ);
+
+        // change camera rotation
+        const cameraRotationXDegRange = 45;
+        const cameraRotationYDegRange = 45;
+        const cameraRotationXDeg = data.cutoff * cameraRotationXDegRange - (cameraRotationXDegRange / 2);
+        const cameraRotationYDeg = data.panning * cameraRotationYDegRange - (cameraRotationYDegRange / 2);
+        this.camera.rotation.set(THREE.Math.degToRad(cameraRotationXDeg), THREE.Math.degToRad(cameraRotationYDeg), 0);
+
+        // change light position
+        this.light.position.set(0, 10 + (data.resonance * 100), 10 + (data.resonance * 100));
 
         const object = this.scene.getObjectByName("stereo");
         if (object) {
-
+            
         }
-
         this.renderer.render(this.scene, this.camera);
     }
 }

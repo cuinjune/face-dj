@@ -3,6 +3,7 @@ const VIDEO_SIZE = 400;
 const lerpAmount = 0.5;
 let model, ctx, videoWidth, videoHeight, video, canvas, threejsDraw;
 let volume = 0, panning = 0.5, cutoff = 0, resonance = 0;
+let nomalizedCenterPoint = [0.5, 0.5];
 
 const mobile = isMobile();
 const state = {
@@ -53,6 +54,7 @@ async function renderPrediction(time) {
                 const boundingBoxCenterY = boundingBoxTopY + (boundingBoxBottomY - boundingBoxTopY) / 2;
                 const nomalizedCenterX = 1 - (boundingBoxCenterX / VIDEO_SIZE);
                 const nomalizedCenterY = boundingBoxCenterY / VIDEO_SIZE;
+                nomalizedCenterPoint = [nomalizedCenterX, nomalizedCenterY];
                 const numScale = 3;
                 const scaledCenterX = Math.min(~~(nomalizedCenterX * numScale), numScale - 1);
                 const scaledCenterY = Math.min(~~(nomalizedCenterY * numScale), numScale - 1);
@@ -80,6 +82,7 @@ async function renderPrediction(time) {
 
                 // debugging
                 if (isDebugMode) {
+                    console.log("pattern: ", pattern);
                     console.log("volume: ", volume);
                     console.log("panning: ", panning);
                     console.log("cutoff: ", cutoff);
@@ -96,7 +99,14 @@ async function renderPrediction(time) {
             }
         });
     }
-    threejsDraw.animate(time);
+    const data = {
+        nomalizedCenterPoint: nomalizedCenterPoint,
+        volume: volume,
+        panning: panning,
+        cutoff: cutoff,
+        resonance: resonance
+    }
+    threejsDraw.animate(time, data);
     requestAnimationFrame(renderPrediction);
 };
 
