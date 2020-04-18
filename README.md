@@ -29,4 +29,4 @@ npm start
 Please post an [issue](https://github.com/cuinjune/face-dj/issues) if you face any problem (e.g. no music playing after clicking the “Play Music” button or speakers not moving) using the app. It seems like it’s not working properly on some machines.
 
 ## Author
-* [Zack Lee](https://www.cuinjune.com/about): an MPS Candidate at [NYU ITP](https://itp.nyu.edu)
+* [Zack Lee](https://www.cuinjune.com/about): an MPS Candidate at [NYU ITP](https://itp.nyu.edu).
