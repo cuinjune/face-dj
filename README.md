@@ -1,10 +1,10 @@
 # Face DJ
 <img src="screenshot.png" alt="Screenshot" width="1000"/>
 
+Here's the [Live Demo on Glitch](https://cuinjune-face-dj.glitch.me/).
+
 You need a webcam, headphones, and a microphone to fully use this app.
 Please try the app on the latest version of Chrome or Firefox. (Safari is not supported)
-
-Here's the [Live Demo on Glitch](https://cuinjune-face-dj.glitch.me/).
 
 ## Features
 * Moving your head by X, Y position changes the song pattern.
