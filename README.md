@@ -8,6 +8,7 @@ Use your face to control music. Here's the [Live Demo on Glitch](https://cuinjun
 * Tilting the head based on the Y-axis controls the panning.
 * Tilting the head based on the X-axis controls the filter cutoff.
 * Opening/closing your mouth controls the filter resonance.
+* Saying something to the microphone plays a vocoder
 
 ## Setup
 1. Installation of node.js is required. Follow [this guide](https://github.com/itp-dwd/2020-spring/blob/master/guides/installing-nodejs.md) to install it.
