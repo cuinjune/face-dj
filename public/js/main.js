@@ -2,7 +2,7 @@ const isDebugMode = false;
 const VIDEO_SIZE = 400;
 const lerpAmount = 0.5;
 let model, ctx, videoWidth, videoHeight, video, canvas, threejsDraw;
-let volume = 0, panning = 0.5, cutoff = 0, resonance = 0;
+let pattern = 4, volume = 0.5, panning = 0.5, cutoff = 0.5, resonance = 0;
 let nomalizedCenterPoint = [0.5, 0.5];
 
 const mobile = isMobile();
@@ -32,16 +32,24 @@ async function setupCamera() {
     });
 }
 
+function sendToPd() {
+    Module.sendFloat("pattern", pattern);
+    Module.sendFloat("volume", volume);
+    Module.sendFloat("panning", panning);
+    Module.sendFloat("cutoff", cutoff);
+    Module.sendFloat("resonance", resonance);
+}
+
 async function renderPrediction(time) {
     const predictions = await model.estimateFaces(video);
     ctx.drawImage(video, 0, 0, videoWidth, videoHeight, 0, 0, canvas.width, canvas.height);
-    
+
     if (predictions.length > 0) {
         predictions.forEach(prediction => {
 
             // The probability of a face being present
             if (prediction.faceInViewConfidence > 0.9) { // only process accurate enough data
-                
+
                 // bounding box
                 const boundingBoxLeftX = prediction.boundingBox.topLeft[0][0];
                 const boundingBoxRightX = prediction.boundingBox.bottomRight[0][0];
@@ -58,7 +66,7 @@ async function renderPrediction(time) {
                 const numScale = 3;
                 const scaledCenterX = Math.min(~~(nomalizedCenterX * numScale), numScale - 1);
                 const scaledCenterY = Math.min(~~(nomalizedCenterY * numScale), numScale - 1);
-                const pattern = scaledCenterY * numScale + scaledCenterX;
+                pattern = scaledCenterY * numScale + scaledCenterX;
 
                 // silhouette
                 const silhouetteLeftZ = prediction.annotations.silhouette[8][2];
@@ -74,11 +82,7 @@ async function renderPrediction(time) {
                 resonance = lerp(resonance, map(lipsLowerInnerCenterY - lipsUpperInnerCenterY, 0, VIDEO_SIZE / 4, 0, 1) / volume, lerpAmount);
 
                 // send to pd
-                Module.sendFloat("pattern", pattern);
-                Module.sendFloat("volume", volume);
-                Module.sendFloat("panning", panning);
-                Module.sendFloat("cutoff", cutoff);
-                Module.sendFloat("resonance", resonance);
+                sendToPd();
 
                 // debugging
                 if (isDebugMode) {
@@ -141,6 +145,8 @@ async function main() {
     model = await facemesh.load({ maxFaces: state.maxFaces });
     threejsDraw = new ThreejsDraw(window.innerWidth, window.innerHeight, "#535353");
     threejsDraw.init();
+    document.getElementById("loadingArea").style.display = "none";
+    sendToPd();
     renderPrediction();
 };
 

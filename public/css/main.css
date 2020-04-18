@@ -12,11 +12,9 @@ body {
     font-family: Helvetica, sans-serif;
 }
 
-/* title */
 #titleArea {
     display: flex;
     flex-direction: column;
-    /* width: 300px; */
 }
 
 #titleArea_row0 {
@@ -36,6 +34,10 @@ body {
     text-indent: 6%;
     width: 60px;
     height: 30px;
+}
+
+#loadingArea {
+    margin-left: 2px;
 }
 
 #container {
