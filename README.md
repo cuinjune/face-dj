@@ -1,6 +1,9 @@
 # Face DJ
 <img src="screenshot.png" alt="Screenshot" width="1000"/>
 
+You need a webcam, headphones, and a microphone to fully use this app.
+Please try the app on the latest version of Chrome or Firefox. (Safari is not supported)
+
 Here's the [Live Demo on Glitch](https://cuinjune-face-dj.glitch.me/).
 
 ## Features
@@ -26,7 +29,7 @@ npm start
 [Tensorflow Facemesh library](https://github.com/tensorflow/tfjs-models/tree/master/facemesh), Three.js, Pure Data, SDL, Emscripten, Node.js, Express.js, [Royalty Free Music from Bensound](https://www.bensound.com/royalty-free-music/track/dance), [Hifi Stereo 3D Model from Google Poly](https://poly.google.com/view/4lmTyNSCszQ).
 
 ## Reporting bugs
-Please post an [issue](https://github.com/cuinjune/face-dj/issues) if you face any problem (e.g. no music playing after clicking the “Play Music” button or speakers not moving) using the app. It seems like it’s not working properly on some machines.
+Please post an [issue](https://github.com/cuinjune/face-dj/issues) if you face any problem (e.g. no music playing after clicking the “Play Music” button or speakers not moving) using the app.
 
 ## Author
 * [Zack Lee](https://www.cuinjune.com/about): an MPS Candidate at [NYU ITP](https://itp.nyu.edu).
