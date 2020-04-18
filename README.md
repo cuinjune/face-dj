@@ -22,5 +22,11 @@ npm start
 ```
 3. Open your web browser and navigate to http://localhost:3000
 
+## Tools used
+[Tensorflow Facemesh library](https://github.com/tensorflow/tfjs-models/tree/master/facemesh), Three.js, Pure Data, SDL, Emscripten, Node.js, Express.js.
+
+## Reporting bugs
+Please post an [issue](https://github.com/cuinjune/face-dj/issues) if you face any problem (e.g. no music playing after clicking the “Play Music” button or speakers not moving) using the app. It seems like it’s not working properly on some machines.
+
 ## Author
 * [Zack Lee](https://www.cuinjune.com/about): an MPS Candidate at [NYU ITP](https://itp.nyu.edu)
