@@ -22,7 +22,7 @@ npm start
 ```
 3. Open your web browser and navigate to http://localhost:3000
 
-## Tools used
+## Tools & assets used
 [Tensorflow Facemesh library](https://github.com/tensorflow/tfjs-models/tree/master/facemesh), Three.js, Pure Data, SDL, Emscripten, Node.js, Express.js, [Royalty Free Music from Bensound](https://www.bensound.com/royalty-free-music/track/dance), [Hifi Stereo 3D Model from Google Poly](https://poly.google.com/view/4lmTyNSCszQ)
 
 ## Reporting bugs
