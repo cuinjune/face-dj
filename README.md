@@ -26,7 +26,7 @@ npm start
 3. Open your web browser and navigate to http://localhost:3000
 
 ## Tools & Assets used
-[Tensorflow Facemesh library](https://github.com/tensorflow/tfjs-models/tree/master/facemesh), Three.js, Pure Data, SDL, Emscripten, Node.js, Express.js, [Royalty Free Music from Bensound](https://www.bensound.com/royalty-free-music/track/dance), [Hifi Stereo 3D Model from Google Poly](https://poly.google.com/view/4lmTyNSCszQ).
+[Tensorflow Facemesh library](https://github.com/tensorflow/tfjs-models/tree/master/facemesh), Three.js, Pure Data, libpd, SDL, Emscripten, Node.js, Express.js, [Royalty Free Music from Bensound](https://www.bensound.com/royalty-free-music/track/dance), [Hifi Stereo 3D Model from Google Poly](https://poly.google.com/view/4lmTyNSCszQ).
 
 ## Reporting bugs
 Please post an [issue](https://github.com/cuinjune/face-dj/issues) if you face any problem (e.g. no music playing after clicking the “Play Music” button or speakers not moving) using the app.
