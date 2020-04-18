@@ -1,6 +1,8 @@
 # Face DJ
 <img src="screenshot.png" alt="Screenshot" width="1000"/>
-Use your face to control music. Here's the [Live Demo on Glitch](https://cuinjune-face-dj.glitch.me/).
+Use your face to control music. 
+
+Here's the [Live Demo on Glitch](https://cuinjune-face-dj.glitch.me/).
 
 ## Features
 * Moving your head by X, Y position changes the song pattern.
