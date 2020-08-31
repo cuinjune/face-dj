@@ -1,6 +1,12 @@
 # Face DJ
 <img src="screenshot.png" alt="Screenshot" width="1000"/>
 
+Face DJ is a face-controlled DJ web application that works in **Chrome or Firefox**.
+
+The app uses the [Tensorflow Facemesh library](https://github.com/tensorflow/tfjs-models/tree/master/facemesh) to accurately detect facial movements and use these data to control music.
+
+I created this app to experiment how the face detection technology can be used for controlling/producing music and provide more immersive musical experience.
+
 Here's the [Live Demo on Glitch](https://cuinjune-face-dj.glitch.me/).
 
 **You need a webcam, headphones, and a microphone to fully use this app.
