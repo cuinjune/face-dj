@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/cuinjune/face-dj#readme",
   "dependencies": {
+    "dependencies": "0.0.1",
     "express": "^4.17.1",
     "serve-favicon": "^2.5.0"
   },
