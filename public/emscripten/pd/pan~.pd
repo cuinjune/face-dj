@@ -4,7 +4,6 @@
 #X obj 298 308 *~;
 #X obj 217 128 inlet~;
 #X obj 298 425 outlet~;
-#X obj 316 154 clip~ 0 1;
 #X obj 316 180 *~ 0.25;
 #X obj 316 207 -~ 0.25;
 #X obj 236 285 cos~;
@@ -15,9 +14,8 @@
 #X connect 3 0 1 0;
 #X connect 3 0 2 0;
 #X connect 5 0 6 0;
-#X connect 6 0 7 0;
+#X connect 5 0 7 0;
 #X connect 6 0 8 0;
-#X connect 7 0 9 0;
-#X connect 8 0 1 1;
-#X connect 9 0 2 1;
-#X connect 10 0 5 0;
+#X connect 7 0 1 1;
+#X connect 8 0 2 1;
+#X connect 9 0 5 0;

@@ -5,7 +5,6 @@
 #include <cstring>
 #include <string>
 #include "PdBase.hpp"
-#include "hello.h"
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
@@ -16,7 +15,7 @@ using namespace emscripten;
 static int numInChannels = 1;
 static int numOutChannels = 2;
 static int sampleRate = 44100;
-static int ticksPerBuffer = 32;
+static int ticksPerBuffer = 64;
 static int blockSize = libpd_blocksize();
 static int bufferSize = ticksPerBuffer * blockSize;
 static float *inBuffer = nullptr;
@@ -146,9 +145,6 @@ int main(int argc, char **argv) {
     libpd_set_printhook(pdprint);
     libpd_init();
     libpd_init_audio(numInChannels, numOutChannels, sampleRate);
-    
-    // load externals
-    Hello::setup();
 
     // compute audio    [; pd dsp 1(
     libpd_start_message(1); // one entry in list

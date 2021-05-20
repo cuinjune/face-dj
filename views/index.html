@@ -24,33 +24,20 @@
 </head>
 
 <body>
-  <div id="main">
-    <div id="titleArea">
-      <div id="titleArea_row0">
-        <h1>Face DJ</h1>
-      </div>
-      <div id="titleArea_row1">
-        <h5>Use your face to control music</h5>
-      </div>
-    </div>
-    <div id="playMusicButtonArea">
-      <button id="playMusicButton">Play Music</button>
-    </div>
-    <div id="loadingArea">
-      <h3>Loading...</h3>
-    </div>
-    <div id="container">
-      <div id="canvas-wrapper">
-        <canvas id="output"></canvas>
-        <video id="video" playsinline style="
-          -webkit-transform: scaleX(-1);
-          transform: scaleX(-1);
-          visibility: hidden;
-          width: auto;
-          height: auto;
-          ">
-        </video>
-      </div>
+  <div id="message-wrapper">
+    <h1 id="message">Click to start</h1>
+  </div>
+  <div id="container">
+    <div id="canvas-wrapper">
+      <canvas id="output"></canvas>
+      <video id="video" playsinline style="
+        -webkit-transform: scaleX(-1);
+        transform: scaleX(-1);
+        visibility: hidden;
+        width: auto;
+        height: auto;
+        ">
+      </video>
     </div>
   </div>
 </body>

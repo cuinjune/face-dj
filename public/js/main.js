@@ -12,6 +12,8 @@ const state = {
     triangulateMesh: false
 };
 
+let isRendered = false;
+
 async function setupCamera() {
     video = document.getElementById("video");
     const stream = await navigator.mediaDevices.getUserMedia({
@@ -112,6 +114,12 @@ async function renderPrediction(time) {
     }
     threejsDraw.animate(time, data);
     requestAnimationFrame(renderPrediction);
+    if (!isRendered) {
+        document.getElementById("message-wrapper").style.display = "none";
+        Module.sendBang("playMusic");
+        sendToPd();
+        isRendered = true;
+    }
 };
 
 async function main() {
@@ -134,8 +142,7 @@ async function main() {
     if (!isDebugMode) {
         canvas.style.display = "none"; // hide the canvas
     }
-    const canvasWrapper = document.getElementById("canvas-wrapper");
-    canvasWrapper.style = `width: ${videoWidth}px; height: ${videoHeight}px`;
+    document.getElementById("canvas-wrapper").style = `width: ${videoWidth}px; height: ${videoHeight}px`;
     ctx = canvas.getContext("2d");
     ctx.translate(canvas.width, 0);
     ctx.scale(-1, 1);
@@ -145,15 +152,12 @@ async function main() {
     model = await facemesh.load({ maxFaces: state.maxFaces });
     threejsDraw = new ThreejsDraw(window.innerWidth, window.innerHeight, "#535353");
     threejsDraw.init();
-    document.getElementById("loadingArea").style.display = "none";
-    sendToPd();
     renderPrediction();
 };
 
 window.addEventListener("DOMContentLoaded", async () => {
-    main();
-    function playMusic() {
-        Module.sendBang("playMusic");
-    }
-    document.getElementById("playMusicButton").addEventListener("click", playMusic, false);
+    document.getElementById("message-wrapper").addEventListener("click", () => {
+        document.getElementById("message").innerText = "Loading...";
+        main();
+    });
 });
